@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>KML Layers</title>
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script type="text/javascript" src="geoxml3.js"></script>
+</head>
+<body>
+<div id="map"></div>
+<script>
+
+    function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 11,
+            center: {lat: 43.254306, lng: -79.881951}
+        });
+
+        var ctaLayer = new google.maps.KmlLayer({
+            //url: 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml',
+            url: 'https://gist.githubusercontent.com/natalieperna/951f1073642486d358623545f652d1a4/raw/7c1c302653c7317ccfaa76cd4ee26f68c21f044f/BIKEWAYS-styled.kml',
+            map: map
+        });
+
+        // Render map on read complete.
+        rendermap = function (contents) {
+
+            if (document.getElementsByClassName == undefined) {
+                document.getElementsByClassName = function (className) {
+                    var hasClassName = new RegExp("(?:^|\s)" + className + "(?:$|\s)");
+                    var allElements = document.getElementsByTagName("*");
+                    var results = [];
+
+                    var element;
+                    for (var i = 0; (element = allElements[i]) != null; i++) {
+                        var elementClass = element.className;
+                        if (elementClass && elementClass.indexOf(className) != -1 && hasClassName.test(elementClass))
+                            results.push(element);
+                    }
+
+                    return results;
+                }
+            }
+
+            // initialize google map
+            var myOptions = {
+                mapTypeId: google.maps.MapTypeId.HYBRID,
+                overviewMapControl: false,
+                rotateControl: false,
+                streetViewControl: false,
+                tilt: 0
+            };
+            //var map = new google.maps.Map(document.getElementById("drop_zone"), myOptions);
+
+            function addMarkerWithLabel(placemark) {
+                if (typeof placemark.latlng != "undefined" && placemark.name.length > 0) {
+                    var labelOptions = {
+                        content: placemark.name,
+                        boxClass: "mapLabel",
+                        disableAutoPan: true,
+                        alignBottom: true,
+                        pixelOffset: new google.maps.Size(7, -12),
+                        position: placemark.latlng,
+                        closeBoxURL: "",
+                        isHidden: false,
+                        pane: "floatPane",
+                        enableEventPropagation: true
+                    };
+
+                    var ibLabel = new InfoBox(labelOptions);
+                    ibLabel.open(map);
+                }
+                myParser.createMarker(placemark);
+            }
+
+            var myParser = new geoXML3.parser({
+                map: map,
+                processStyles: true,
+                createMarker: addMarkerWithLabel,
+                suppressInfoWindows: true
+            });
+            myParser.parseKmlString(contents);
+
+        }
+
+        function xhr() {
+            var xmlHttp;
+            try {
+                xmlHttp = new XMLHttpRequest();
+            } catch (e) {
+                try {
+                    xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch (e) {
+                    try {
+                        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (e) {
+                        alert("Your browser does not support AJAX!");
+                        return false;
+                    }
+                }
+            }
+            return xmlHttp;
+        }
+
+        req = xhr();
+        req.open("GET", "BIKEWAYS-styled.kml");
+        req.onreadystatechange = function () {
+            rendermap(req.responseText);
+        };
+        req.send(null);
+    }
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAfTQSTludZlrcG7WZM215jr0hUr96-7-8&callback=initMap">
+</script>
+</body>
+</html>
