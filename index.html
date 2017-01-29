@@ -168,12 +168,17 @@
         var destinationInput = document.getElementById('destination-input');
         var toggleButtons = document.getElementById('FormName');
         this.directionsService = new google.maps.DirectionsService;
-        this.directionsDisplay = new google.maps.DirectionsRenderer({
+        var directionsDisplay = new google.maps.DirectionsRenderer({
             draggable: true,
             map: map,
             panel: document.getElementById('directions-out')
         });
-        this.directionsDisplay.setMap(map);
+        this.directionsDisplay = directionsDisplay;
+        directionsDisplay.setMap(map);
+
+        directionsDisplay.addListener('directions_changed', function() {
+            computeTotalDistance(directionsDisplay.getDirections());
+        });
 
         var originAutocomplete = new google.maps.places.Autocomplete(
             originInput, {placeIdOnly: true});
