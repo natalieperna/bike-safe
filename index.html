@@ -17,57 +17,17 @@
 <input id="destination-input" class="controls" type="text"
        placeholder="Enter a destination location">
 
-<form id="FormName" action="(EmptyReference!)" method="get" name="FormName">
-    <div>Count the calories?</div>
-    <input type="radio" name="radiogroup" value="yes">Yes <input type="radio" name="radiogroup" value="no" checked>No
-    <p>
-    <fieldset id="hiddenFieldset">
-        <div>The trip will burn <span id="calories"></span> calories.</div>
-        <!--<input type="text" name="inputBox" size="24"> <button id="add" type="button">Add ></button> <select name="listBox[]" id="listBox" size="4" multiple></select> <button id="remove" type="button">Remove</button>-->
-    </fieldset>
-    </p>
-</form>
-
 <div id="map"></div>
 <div id="right-panel">
     <a href="#" class="btn btn-danger" id="opener"><i class="glyphicon glyphicon-align-justify"></i></a>
     <div id="directions-out"></div>
 </div>
 <script>
-    window.onload = function() {
-        hiddenFieldset = document.getElementById("hiddenFieldset");
-        inputBox = document.FormName.inputBox;
-        listBox = document.getElementById("listBox");
-
-        caloriesBurnt = document.getElementById("calories");
-        caloriesBurnt.innerHTML = "<strong>0</strong>";
-
-        document.FormName.radiogroup[0].onclick = function() {
-            hiddenFieldset.style.display = "block";
-        }
-        document.FormName.radiogroup[1].onclick = function() {
-            hiddenFieldset.style.display = "none";
-        }
-
-        hiddenFieldset.style.display = "none";
-    }
-
-    function computeTotalDistance(result) {
-        var total = 0;
-        var myroute = result.routes[0];
-        for (var i = 0; i < myroute.legs.length; i++) {
-            total += myroute.legs[i].distance.value;
-        }
-        total = (total / 1000) * 77.24832;
-        document.getElementById('calories').innerHTML = '<strong>' + total.toFixed(1) + '</strong>';
-    }
-
     function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 14,
             center: {lat: 43.254306, lng: -79.881951}
         });
-
 
         rendermap = function (contents) {
             if (document.getElementsByClassName == undefined) {
@@ -166,17 +126,12 @@
         var originInput = document.getElementById('origin-input');
         var destinationInput = document.getElementById('destination-input');
         this.directionsService = new google.maps.DirectionsService;
-        var directionsDisplay = new google.maps.DirectionsRenderer({
+        this.directionsDisplay = new google.maps.DirectionsRenderer({
             draggable: true,
             map: map,
             panel: document.getElementById('directions-out')
         });
-        this.directionsDisplay = directionsDisplay;
-        directionsDisplay.setMap(map);
-
-        directionsDisplay.addListener('directions_changed', function() {
-            computeTotalDistance(directionsDisplay.getDirections());
-        });
+        this.directionsDisplay.setMap(map);
 
         var originAutocomplete = new google.maps.places.Autocomplete(
             originInput, {placeIdOnly: true});
