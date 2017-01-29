@@ -1,48 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="initial-scale=1.0">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <title>Bike Safe Hamilton</title>
-    <style>
-        /* Always set the map height explicitly to define the size of the div
-         * element that contains the map. */
-        #map {
-            height: 100%;
-        }
-
-        /* Optional: Makes the sample page fill the window. */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-    </style>
-    <script type="text/javascript" src="geoxml3.js"></script>
+    <title>Draggable directions</title>
+    <script type="text/javascript" src="js/geoxml3.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div id="map"></div>
-<script>
+<input id="origin-input" class="controls" type="text"
+       placeholder="Enter an origin location">
 
+<input id="destination-input" class="controls" type="text"
+       placeholder="Enter a destination location">
+
+<div id="map"></div>
+<div id="right-panel">
+    <a href="#" class="btn btn-danger" id="opener"><i class="glyphicon glyphicon-align-justify"></i></a>
+    <div id="directions-out"></div>
+</div>
+<script>
     function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 11,
+            zoom: 14,
             center: {lat: 43.254306, lng: -79.881951}
         });
 
-        /*
-        var ctaLayer = new google.maps.KmlLayer({
-            //url: 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml',
-            url: 'https://gist.githubusercontent.com/natalieperna/951f1073642486d358623545f652d1a4/raw/7c1c302653c7317ccfaa76cd4ee26f68c21f044f/BIKEWAYS-styled.kml',
-            map: map
-        });
-
-        console.log(ctaLayer);
-        */
-
-        // Render map on read complete.
         rendermap = function (contents) {
-
             if (document.getElementsByClassName == undefined) {
                 document.getElementsByClassName = function (className) {
                     var hasClassName = new RegExp("(?:^|\s)" + className + "(?:$|\s)");
@@ -59,16 +46,6 @@
                     return results;
                 }
             }
-
-            // initialize google map
-            var myOptions = {
-                mapTypeId: google.maps.MapTypeId.HYBRID,
-                overviewMapControl: false,
-                rotateControl: false,
-                streetViewControl: false,
-                tilt: 0
-            };
-            //var map = new google.maps.Map(document.getElementById("drop_zone"), myOptions);
 
             function addMarkerWithLabel(placemark) {
                 if (typeof placemark.latlng != "undefined" && placemark.name.length > 0) {
@@ -95,7 +72,8 @@
                 map: map,
                 processStyles: true,
                 createMarker: addMarkerWithLabel,
-                suppressInfoWindows: true
+                suppressInfoWindows: true,
+                zoom: false
             });
             myParser.parseKmlString(contents);
 
@@ -121,15 +99,97 @@
         }
 
         req = xhr();
-        req.open("GET", "BIKEWAYS-filtered-styled.kml");
+        req.open("GET", "data/BIKEWAYS.kml");
         req.onreadystatechange = function () {
             rendermap(req.responseText);
         };
         req.send(null);
+
+        new AutocompleteDirectionsHandler(map);
+
+        $('#opener').on('click', function () {
+            var panel = $('#right-panel');
+            if (panel.hasClass("visible")) {
+                panel.removeClass('visible').animate({'margin-right': '-350px'});
+            } else {
+                panel.addClass('visible').animate({'margin-right': '0px'});
+            }
+            return false;
+        });
     }
+
+    /**
+     * @constructor
+     */
+    function AutocompleteDirectionsHandler(map) {
+        this.map = map;
+        this.originPlaceId = null;
+        this.destinationPlaceId = null;
+        this.travelMode = 'BICYCLING';
+        var originInput = document.getElementById('origin-input');
+        var destinationInput = document.getElementById('destination-input');
+        //var modeSelector = document.getElementById('mode-selector');
+        this.directionsService = new google.maps.DirectionsService;
+        this.directionsDisplay = new google.maps.DirectionsRenderer({
+            draggable: true,
+            map: map,
+            panel: document.getElementById('directions-out')
+        });
+        this.directionsDisplay.setMap(map);
+
+        var originAutocomplete = new google.maps.places.Autocomplete(
+            originInput, {placeIdOnly: true});
+        var destinationAutocomplete = new google.maps.places.Autocomplete(
+            destinationInput, {placeIdOnly: true});
+
+        this.setupPlaceChangedListener(originAutocomplete, 'ORIG');
+        this.setupPlaceChangedListener(destinationAutocomplete, 'DEST');
+
+        this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
+        this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(destinationInput);
+    }
+
+    AutocompleteDirectionsHandler.prototype.setupPlaceChangedListener = function (autocomplete, mode) {
+        var me = this;
+        autocomplete.bindTo('bounds', this.map);
+        autocomplete.addListener('place_changed', function () {
+            var place = autocomplete.getPlace();
+            if (!place.place_id) {
+                window.alert("Please select an option from the dropdown list.");
+                return;
+            }
+            if (mode === 'ORIG') {
+                me.originPlaceId = place.place_id;
+            } else {
+                me.destinationPlaceId = place.place_id;
+            }
+            me.route();
+        });
+
+    };
+
+    AutocompleteDirectionsHandler.prototype.route = function () {
+        if (!this.originPlaceId || !this.destinationPlaceId) {
+            return;
+        }
+        var me = this;
+
+        this.directionsService.route({
+            origin: {'placeId': this.originPlaceId},
+            destination: {'placeId': this.destinationPlaceId},
+            travelMode: this.travelMode
+        }, function (response, status) {
+            if (status === 'OK') {
+                me.directionsDisplay.setDirections(response);
+            } else {
+                window.alert('Directions request failed due to ' + status);
+            }
+        });
+    };
+
 </script>
 <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAfTQSTludZlrcG7WZM215jr0hUr96-7-8&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDf8jpKv3A0uZlPB5yxELFagbjMrvZak8Y&callback=initMap&libraries=places">
 </script>
 </body>
 </html>
