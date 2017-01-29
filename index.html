@@ -121,7 +121,7 @@
         }
 
         req = xhr();
-        req.open("GET", "BIKEWAYS-styled.kml");
+        req.open("GET", "BIKEWAYS-filtered-styled.kml");
         req.onreadystatechange = function () {
             rendermap(req.responseText);
         };
