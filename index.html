@@ -17,12 +17,53 @@
 <input id="destination-input" class="controls" type="text"
        placeholder="Enter a destination location">
 
+<form id="FormName" action="(EmptyReference!)" method="get" name="FormName" class="container">
+    <div><strong>Count the calories?</strong></div>
+    <label class="radio-inline">
+        <input type="radio" name="radiogroup" value="yes">Yes
+    </label>
+    <label class="radio-inline">
+        <input type="radio" name="radiogroup" value="no">No
+    </label>
+    <p>
+    <fieldset id="hiddenFieldset">
+        <div>The trip will burn an estimated <span id="calories"></span> calories.</div>
+  </fieldset>
+    </p>
+</form>
+
 <div id="map"></div>
 <div id="right-panel">
     <a href="#" class="btn btn-danger" id="opener"><i class="glyphicon glyphicon-align-justify"></i></a>
     <div id="directions-out"></div>
 </div>
 <script>
+    window.onload = function() {
+        hiddenFieldset = document.getElementById("hiddenFieldset");
+
+        caloriesBurnt = document.getElementById("calories");
+        caloriesBurnt.innerHTML = "<strong>0</strong>";
+
+        document.FormName.radiogroup[0].onclick = function() {
+            hiddenFieldset.style.display = "block";
+        }
+        document.FormName.radiogroup[1].onclick = function() {
+            hiddenFieldset.style.display = "none";
+        }
+
+        hiddenFieldset.style.display = "none";
+    }
+
+    function computeTotalDistance(result) {
+        var total = 0;
+        var myroute = result.routes[0];
+        for (var i = 0; i < myroute.legs.length; i++) {
+            total += myroute.legs[i].distance.value;
+        }
+        total = (total / 1000) * 38.62416;
+        document.getElementById('calories').innerHTML = '<strong>' + total.toFixed(1) + '</strong>';
+    }
+
     function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 14,
@@ -125,6 +166,7 @@
         this.travelMode = 'BICYCLING';
         var originInput = document.getElementById('origin-input');
         var destinationInput = document.getElementById('destination-input');
+        var toggleButtons = document.getElementById('FormName');
         this.directionsService = new google.maps.DirectionsService;
         this.directionsDisplay = new google.maps.DirectionsRenderer({
             draggable: true,
@@ -143,6 +185,7 @@
 
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(destinationInput);
+        this.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(toggleButtons);
     }
 
     AutocompleteDirectionsHandler.prototype.setupPlaceChangedListener = function (autocomplete, mode) {
