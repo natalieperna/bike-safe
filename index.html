@@ -17,9 +17,14 @@
 <input id="destination-input" class="controls" type="text"
        placeholder="Enter a destination location">
 
-<form id="FormName" action="(EmptyReference!)" method="get" name="FormName">
+<form id="FormName" action="(EmptyReference!)" method="get" name="FormName" class="container">
     <div><strong>Count the calories?</strong></div>
-    <input type="radio" name="radiogroup" value="yes">Yes <input type="radio" name="radiogroup" value="no" checked>No
+    <label class="radio-inline">
+        <input type="radio" name="radiogroup" value="yes">Yes
+    </label>
+    <label class="radio-inline">
+        <input type="radio" name="radiogroup" value="no">No
+    </label>
     <p>
     <fieldset id="hiddenFieldset">
         <div>The trip will burn <span id="calories"></span> calories.</div>
@@ -186,7 +191,7 @@
 
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(destinationInput);
-        this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(toggleButtons);
+        this.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(toggleButtons);
     }
 
     AutocompleteDirectionsHandler.prototype.setupPlaceChangedListener = function (autocomplete, mode) {

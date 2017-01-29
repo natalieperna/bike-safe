@@ -99,3 +99,14 @@ html, body {
     height: 100%;
     overflow: scroll;
 }
+
+#FormName {
+    background: rgba(255, 255, 255, 0.65098);
+    padding: 5px;
+    width: 200px;
+    font-size: 12px;
+}
+
+input[type=radio], input[type=checkbox] {
+    margin: 0;
+}
