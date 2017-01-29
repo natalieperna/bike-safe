@@ -27,7 +27,7 @@
     </label>
     <p>
     <fieldset id="hiddenFieldset">
-        <div>The trip will burn <span id="calories"></span> calories.</div>
+        <div>The trip will burn an estimated <span id="calories"></span> calories.</div>
   </fieldset>
     </p>
 </form>
@@ -60,7 +60,7 @@
         for (var i = 0; i < myroute.legs.length; i++) {
             total += myroute.legs[i].distance.value;
         }
-        total = (total / 1000) * 77.24832;
+        total = (total / 1000) * 38.62416;
         document.getElementById('calories').innerHTML = '<strong>' + total.toFixed(1) + '</strong>';
     }
 
