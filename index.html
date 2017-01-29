@@ -18,13 +18,12 @@
        placeholder="Enter a destination location">
 
 <form id="FormName" action="(EmptyReference!)" method="get" name="FormName">
-    <div>Count the calories?</div>
+    <div><strong>Count the calories?</strong></div>
     <input type="radio" name="radiogroup" value="yes">Yes <input type="radio" name="radiogroup" value="no" checked>No
     <p>
     <fieldset id="hiddenFieldset">
         <div>The trip will burn <span id="calories"></span> calories.</div>
-        <!--<input type="text" name="inputBox" size="24"> <button id="add" type="button">Add ></button> <select name="listBox[]" id="listBox" size="4" multiple></select> <button id="remove" type="button">Remove</button>-->
-    </fieldset>
+  </fieldset>
     </p>
 </form>
 
@@ -36,8 +35,6 @@
 <script>
     window.onload = function() {
         hiddenFieldset = document.getElementById("hiddenFieldset");
-        inputBox = document.FormName.inputBox;
-        listBox = document.getElementById("listBox");
 
         caloriesBurnt = document.getElementById("calories");
         caloriesBurnt.innerHTML = "<strong>0</strong>";
@@ -165,6 +162,7 @@
         this.travelMode = 'BICYCLING';
         var originInput = document.getElementById('origin-input');
         var destinationInput = document.getElementById('destination-input');
+        var toggleButtons = document.getElementById('FormName');
         this.directionsService = new google.maps.DirectionsService;
         var directionsDisplay = new google.maps.DirectionsRenderer({
             draggable: true,
@@ -188,6 +186,7 @@
 
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(destinationInput);
+        this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(toggleButtons);
     }
 
     AutocompleteDirectionsHandler.prototype.setupPlaceChangedListener = function (autocomplete, mode) {
